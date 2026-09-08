@@ -1,0 +1,75 @@
+package saber.flow.com.example.demo.infra.persistence.adapters;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import lombok.RequiredArgsConstructor;
+import saber.flow.com.example.demo.domain.model.Category;
+import saber.flow.com.example.demo.domain.model.Language;
+import saber.flow.com.example.demo.domain.model.Option;
+import saber.flow.com.example.demo.domain.model.Question;
+import saber.flow.com.example.demo.domain.repository.QuestionRepository;
+import saber.flow.com.example.demo.infra.persistence.entities.CategoryEntity;
+import saber.flow.com.example.demo.infra.persistence.entities.LanguageEntity;
+import saber.flow.com.example.demo.infra.persistence.entities.OptionEntity;
+import saber.flow.com.example.demo.infra.persistence.entities.QuestionEntity;
+import saber.flow.com.example.demo.infra.persistence.repository.CategoryJpaRepository;
+import saber.flow.com.example.demo.infra.persistence.repository.OptionJpaRepository;
+import saber.flow.com.example.demo.infra.persistence.repository.QuestionJpaRepository;
+
+@Repository
+@RequiredArgsConstructor
+public class QuestionRepositoryAdapter implements QuestionRepository {
+
+    private final QuestionJpaRepository questionJpaRepository;
+    private final CategoryJpaRepository categoryJpaRepository;
+    private final OptionJpaRepository optionJpaRepository;
+
+    @Override
+    public Question save(Question question) {
+        String categoryId = question.getCategory().getId();
+        CategoryEntity categoryEntity = categoryJpaRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
+
+        QuestionEntity entity = new QuestionEntity(question.getId(), categoryEntity, question.getType(), question.getQuestion());
+        return toDomain(questionJpaRepository.save(entity));
+    }
+
+    @Override
+    public Optional<Question> findById(String id) {
+        return questionJpaRepository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public List<Question> findAll() {
+        return questionJpaRepository.findAll().stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    public List<Question> findByCategoryId(String categoryId) {
+        return questionJpaRepository.findByCategory_Id(categoryId).stream().map(this::toDomain).toList();
+    }
+
+    @Override
+    public void deleteById(String id) {
+        questionJpaRepository.deleteById(id);
+    }
+
+    private Question toDomain(QuestionEntity entity) {
+        CategoryEntity categoryEntity = entity.getCategory();
+        LanguageEntity languageEntity = categoryEntity.getLanguage();
+        Language language = new Language(languageEntity.getId(), languageEntity.getLanguage());
+        Category category = new Category(categoryEntity.getId(), categoryEntity.getName(), language);
+        List<Option> options = optionJpaRepository.findByQuestion_Id(entity.getId()).stream()
+                .map(this::toDomainOption)
+                .toList();
+
+        return new Question(entity.getId(), category, entity.getType(), entity.getQuestion(), options);
+    }
+
+    private Option toDomainOption(OptionEntity entity) {
+        return new Option(entity.getId(), entity.getOption(), entity.getIsCorrect(), entity.getQuestion().getId());
+    }
+}
