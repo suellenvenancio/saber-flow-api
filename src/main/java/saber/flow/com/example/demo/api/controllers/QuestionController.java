@@ -19,7 +19,9 @@ import saber.flow.com.example.demo.api.dto.response.CategoryResponse;
 import saber.flow.com.example.demo.api.dto.response.LanguageResponse;
 import saber.flow.com.example.demo.api.dto.response.OptionResponse;
 import saber.flow.com.example.demo.api.dto.response.QuestionResponse;
+import saber.flow.com.example.demo.application.useCases.AdaptiveQuestionUseCase;
 import saber.flow.com.example.demo.application.useCases.QuestionUseCase;
+import saber.flow.com.example.demo.domain.enums.Level;
 import saber.flow.com.example.demo.domain.model.Category;
 import saber.flow.com.example.demo.domain.model.Language;
 import saber.flow.com.example.demo.domain.model.Option;
@@ -31,6 +33,7 @@ import saber.flow.com.example.demo.domain.model.Question;
 public class QuestionController {
 
     private final QuestionUseCase questionUseCase;
+    private final AdaptiveQuestionUseCase adaptiveQuestionUseCase;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> save(@RequestBody QuestionRequest request) {
@@ -52,14 +55,20 @@ public class QuestionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<QuestionResponse>> findAll(
-            @RequestParam(required = false) String categoryId
+    public ResponseEntity<List<QuestionResponse>> findAll( 
+            @RequestParam(required = false) List<String> categoryIds,
+            @RequestParam(required = true) String languageId,
+            @RequestParam(required = false) Level level,
+            @RequestParam(required = true) int size,
+            @RequestParam(required = false) String userId 
     ) {
-        List<Question> questions = categoryId != null && !categoryId.isBlank()
-                ? questionUseCase.findByCategoryId(categoryId)
-                : questionUseCase.findAll();
+      if (size <= 0 || languageId == null || languageId.isBlank()) {
+        return ResponseEntity.badRequest().build();
+      }
 
-        return ResponseEntity.ok(questions.stream().map(this::toResponse).toList());
+      List<Question> questions = adaptiveQuestionUseCase.findAdaptive(categoryIds, languageId, level, size, userId);
+
+      return ResponseEntity.ok(questions.stream().map(this::toResponse).toList());
     }
 
     @DeleteMapping("/{id}")

@@ -45,15 +45,58 @@ public class CardRepositoryAdapter implements CardRepository {
     }
 
     @Override
-    public List<Card> findByCategoryId(String categoryId) {
+    public List<Card> findAllByCategoryId(String categoryId) {
         return cardJpaRepository.findByCategory_Id(categoryId).stream().map(this::toDomain).toList();
     }
 
     @Override
     public void deleteById(String id) {
         cardJpaRepository.deleteById(id);
+    } 
+
+    @Override
+    public List<Card> findByCategoryIdAndLevel(String categoryId, Level level, int size) {
+        return cardJpaRepository.findByCategory_IdAndLevel(categoryId, level)
+                .stream()
+                .map(this::toDomain)
+                .limit(size)
+                .toList();
     }
 
+    @Override
+    public List<Card> findCardByLanguageIdAndLevel(String languageId, Level level, int size) {
+        return cardJpaRepository.findByCategory_Language_IdAndLevel(languageId, level)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Card> findAllByLanguageId(String languageId) {
+      return cardJpaRepository.findByCategory_Language_Id(languageId)
+          .stream()
+          .map(this::toDomain)
+          .toList();
+    }
+    
+    @Override
+    public List<Card> findCardByLanguageId(String languageId, int size) {
+        return cardJpaRepository.findByCategory_Language_Id(languageId)
+                .stream()
+                .map(this::toDomain)
+                .limit(size)
+                .toList();
+    }
+
+    @Override
+    public List<Card> findByCategoryId(String categoryId, int size) {
+      return cardJpaRepository.findByCategory_Id(categoryId)
+          .stream()
+          .map(this::toDomain)
+          .limit(size)
+          .toList();
+    }
+    
     private Card toDomain(CardEntity entity) {
         CategoryEntity categoryEntity = entity.getCategory();
         LanguageEntity languageEntity = categoryEntity.getLanguage();
@@ -75,45 +118,5 @@ public class CardRepositoryAdapter implements CardRepository {
             entity.getExemploTranslate(),
             category, entity.getLevel()
           );
-    }
-
-    @Override
-    public List<Card> findByCategoryIdAndLevel(String categoryId, Level level) {
-        return cardJpaRepository.findByCategory_IdAndLevel(categoryId, level)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public List<Card> findCardByLanguageIdAndLevel(String languageId, Level level) {
-        return cardJpaRepository.findByCategory_Language_IdAndLevel(languageId, level)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public List<Card> findCardByLanguageId(String languageId) {
-        return cardJpaRepository.findByCategory_Language_Id(languageId)
-                .stream()
-                .map(this::toDomain)
-                .toList();
-    }
-
-    @Override
-    public List<Card> findByCategoryIdAndLevelAndLanguageId(String categoryId, Level level, String languageId) {
-      return cardJpaRepository.findByCategory_IdAndLevelAndCategory_Language_Id(categoryId, level, languageId)
-          .stream()
-          .map(this::toDomain)
-          .toList();
-    }
-    
-    @Override
-    public List<Card> findByCategoryIdAndLanguageId(String categoryId, String languageId) {
-        return cardJpaRepository.findByCategory_IdAndCategory_Language_Id(categoryId, languageId)
-                .stream()
-                .map(this::toDomain)
-                .toList();
     }
 }

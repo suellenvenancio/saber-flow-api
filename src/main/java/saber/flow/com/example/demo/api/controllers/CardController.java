@@ -17,6 +17,7 @@ import saber.flow.com.example.demo.api.dto.request.CardRequest;
 import saber.flow.com.example.demo.api.dto.response.CardResponse;
 import saber.flow.com.example.demo.api.dto.response.CategoryResponse;
 import saber.flow.com.example.demo.api.dto.response.LanguageResponse;
+import saber.flow.com.example.demo.application.useCases.AdaptiveCardUseCase;
 import saber.flow.com.example.demo.application.useCases.CardUseCase;
 import saber.flow.com.example.demo.domain.enums.Level;
 import saber.flow.com.example.demo.domain.model.Card;
@@ -29,6 +30,7 @@ import saber.flow.com.example.demo.domain.model.Language;
 public class CardController {
 
     private final CardUseCase cardUseCase;
+    private final AdaptiveCardUseCase adaptiveCardUseCase;
 
     @PostMapping
     public ResponseEntity<CardResponse> save(@RequestBody CardRequest request) {
@@ -56,24 +58,14 @@ public class CardController {
             @RequestParam(required = false) List<String> categoryIds,
             @RequestParam(required = true) String languageId,
             @RequestParam(required = false) Level level,
-            @RequestParam(required = true) int size
-            
+            @RequestParam(required = true) int size,
+            @RequestParam(required = false) String userId
     ) {
         if (languageId == null || size <= 0) {
             return ResponseEntity.badRequest().build();
         }
-        
-        List<Card> cards;
 
-        if (categoryIds != null && level != null) {
-            cards = cardUseCase.findByCategoryIdsAndLevel(categoryIds, level, languageId, size);
-        } else if ((categoryIds == null || categoryIds.isEmpty()) && level != null) {
-            cards = cardUseCase.findCardByLanguageIdAndLevel(languageId, level, size);
-        } else if (categoryIds != null && level == null) {
-            cards = cardUseCase.findByCategoryId(categoryIds, languageId, size);
-        } else {
-            cards = cardUseCase.findCardByLanguageId(languageId, size);
-        }  
+        List<Card> cards = adaptiveCardUseCase.findAdaptive(categoryIds, languageId, level, size, userId);
 
         return ResponseEntity.ok(cards.stream().map(this::toResponse).toList());
     }

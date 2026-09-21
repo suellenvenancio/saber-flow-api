@@ -29,12 +29,12 @@ public class CardUseCase {
         return cardRepository.findAll();
     }
 
-    public List<Card> findByCategoryId(List<String> categoryIds, String languageId, int size) {
+    public List<Card> findByCategoryId(List<String> categoryIds, int size) {
         List<Card> result = new ArrayList<>();
-        int cardsPerCategory = size / categoryIds.size();
+        int cardsPerCategory = (int) Math.round((double) size / categoryIds.size());
 
         categoryIds.forEach(categoryId -> {
-            List<Card> cardsByCategory = cardRepository.findByCategoryIdAndLanguageId(categoryId, languageId);
+            List<Card> cardsByCategory = cardRepository.findByCategoryId (categoryId, size);
             result.addAll(cardsByCategory.stream().limit(cardsPerCategory).toList());
         });
         return result;
@@ -45,24 +45,18 @@ public class CardUseCase {
         int cardsPerCategory = size / categoryIds.size();
 
         categoryIds.forEach(categoryId -> {
-            List<Card> cardsByCategory = cardRepository.findByCategoryIdAndLevelAndLanguageId(categoryId, level, languageId);
+            List<Card> cardsByCategory = cardRepository.findByCategoryIdAndLevel(categoryId, level, size);
             result.addAll(cardsByCategory.stream().limit(cardsPerCategory).toList());
         });
         return result;
     }
 
     public List<Card> findCardByLanguageIdAndLevel(String languageId, Level level, int size) {
-        return cardRepository.findCardByLanguageIdAndLevel(languageId, level)
-                .stream()
-                .limit(size)
-                .toList();
+        return cardRepository.findCardByLanguageIdAndLevel(languageId, level, size);
     }
 
     public List<Card> findCardByLanguageId(String languageId, int size) {
-        return cardRepository.findCardByLanguageId(languageId)
-                .stream()
-                .limit(size)
-                .toList();
+      return cardRepository.findCardByLanguageId(languageId, size);
     }
 
     public void deleteById(String id) {

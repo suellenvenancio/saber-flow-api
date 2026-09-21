@@ -1,11 +1,13 @@
 package saber.flow.com.example.demo.application.useCases;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import saber.flow.com.example.demo.domain.enums.Level;
 import saber.flow.com.example.demo.domain.model.Question;
 import saber.flow.com.example.demo.domain.repository.QuestionRepository;
 
@@ -28,10 +30,35 @@ public class QuestionUseCase {
     }
 
     public List<Question> findByCategoryId(String categoryId) {
-        return questionRepository.findByCategoryId(categoryId);
+        return questionRepository.findAllByCategoryId(categoryId);
     }
 
     public void deleteById(String id) {
-        questionRepository.deleteById(id);
+      questionRepository.deleteById(id);
+    }
+    
+    public List<Question> findByCategoryIdsAndLevel(List<String> categoryIds, Level level, int size) {
+      return questionRepository.findByCategoryIdsAndLevel(categoryIds, level, size);
+    }
+    
+    public List<Question> findCardByLanguageIdAndLevel(Level level, String languageId, int size) {
+      return questionRepository.findCardByLanguageIdAndLevel(languageId, level, size);
+    }
+
+    public List<Question> findByCategoryIds(List<String> categoryIds, int size) {
+      List<Question> result = new ArrayList<>(); 
+
+      int questionsPerCategory = (int) Math.round((double) size / categoryIds.size());
+
+      categoryIds.forEach(id -> {
+        List<Question> question = questionRepository.findByCategoryId(id, questionsPerCategory);
+        result.addAll(question.stream().limit(questionsPerCategory).toList());
+      });
+
+      return result;
+    }
+    
+    public List<Question> findCardByLanguageId(String languageId, int size) {
+      return questionRepository.findCardByLanguageId(languageId, size);
     }
 }

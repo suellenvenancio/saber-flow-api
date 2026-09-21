@@ -1,11 +1,13 @@
 package saber.flow.com.example.demo.infra.persistence.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
+import saber.flow.com.example.demo.domain.enums.Level;
 import saber.flow.com.example.demo.domain.model.Category;
 import saber.flow.com.example.demo.domain.model.Language;
 import saber.flow.com.example.demo.domain.model.Option;
@@ -45,16 +47,52 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
     @Override
     public List<Question> findAll() {
         return questionJpaRepository.findAll().stream().map(this::toDomain).toList();
-    }
-
-    @Override
-    public List<Question> findByCategoryId(String categoryId) {
-        return questionJpaRepository.findByCategory_Id(categoryId).stream().map(this::toDomain).toList();
-    }
-
+    } 
     @Override
     public void deleteById(String id) {
         questionJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Question> findByCategoryIdsAndLevel(List<String> categoryIds, Level level, int size) { 
+      List<Question> result = new ArrayList<>();
+      categoryIds.forEach(categoryId -> {
+        List<Question> questions = questionJpaRepository.findByCategory_IdAndLevel(categoryId, level.name()).stream()
+                .map(this::toDomain)
+                .limit(size)
+            .toList();
+        result.addAll(questions);
+      });
+      return result;
+    } 
+
+    @Override
+    public List<Question> findCardByLanguageIdAndLevel(String languageId, Level level, int size) {
+        return questionJpaRepository.findByCategory_Language_IdAndLevel(languageId, level.name()).stream()
+                .map(this::toDomain)
+                .limit(size)
+                .toList();
+    }
+
+    @Override
+    public List<Question> findByCategoryId(String categoryId, int size) { 
+        return questionJpaRepository.findByCategory_Id(categoryId).stream()
+                .map(this::toDomain)
+                .limit(size)
+                .toList();
+    }
+
+    @Override
+    public List<Question> findCardByLanguageId(String languageId, int size) {
+      return questionJpaRepository.findByCategory_Language_Id(languageId).stream()
+          .map(this::toDomain)
+          .limit(size)
+          .toList();
+    }
+    
+    @Override
+    public List<Question> findAllByCategoryId(String categoryId) {
+      return questionJpaRepository.findByCategory_Id(categoryId).stream().map(this::toDomain).toList();
     }
 
     private Question toDomain(QuestionEntity entity) {
@@ -71,5 +109,5 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
 
     private Option toDomainOption(OptionEntity entity) {
         return new Option(entity.getId(), entity.getOption(), entity.getIsCorrect(), entity.getQuestion().getId());
-    }
+    } 
 }

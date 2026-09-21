@@ -10,13 +10,13 @@ public interface CardRepository {
     Card save(Card card);
     Optional<Card> findById(String id);
     List<Card> findAll();
-    List<Card> findByCategoryId(String categoryId);
-    List<Card> findByCategoryIdAndLanguageId(String categoryId, String languageId);
-    List<Card> findByCategoryIdAndLevel(String categoryId, Level level);
-    List<Card> findCardByLanguageIdAndLevel(String languageId, Level level);
-    List<Card> findCardByLanguageId(String languageId);
 
-    List<Card> findByCategoryIdAndLevelAndLanguageId(String categoryId, Level level, String languageId);
-    
+    List<Card> findAllByCategoryId(String categoryId);
+    List<Card> findByCategoryId(String categoryId, int size);
+    List<Card> findByCategoryIdAndLevel(String categoryId, Level level, int size);
+    List<Card> findCardByLanguageIdAndLevel(String languageId, Level level, int size);
+
+    List<Card> findCardByLanguageId(String languageId, int size);
+    List<Card> findAllByLanguageId(String languageId);
     void deleteById(String id);
 }
