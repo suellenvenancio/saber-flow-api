@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import saber.flow.com.example.demo.domain.enums.Level;
 import saber.flow.com.example.demo.domain.model.Question;
 import saber.flow.com.example.demo.domain.repository.QuestionRepository;
 
@@ -37,14 +36,6 @@ public class QuestionUseCase {
       questionRepository.deleteById(id);
     }
     
-    public List<Question> findByCategoryIdsAndLevel(List<String> categoryIds, Level level, int size) {
-      return questionRepository.findByCategoryIdsAndLevel(categoryIds, level, size);
-    }
-    
-    public List<Question> findCardByLanguageIdAndLevel(Level level, String languageId, int size) {
-      return questionRepository.findCardByLanguageIdAndLevel(languageId, level, size);
-    }
-
     public List<Question> findByCategoryIds(List<String> categoryIds, int size) {
       List<Question> result = new ArrayList<>(); 
 

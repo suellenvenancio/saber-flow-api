@@ -58,15 +58,7 @@ public class AdaptiveQuestionUseCase {
     }
 
     private List<Question> resolveCandidates(List<String> categoryIds, String languageId, Level level, int size) {
-        if (categoryIds != null && !categoryIds.isEmpty() && level != null) {
-            return questionUseCase.findByCategoryIdsAndLevel(categoryIds, level, size);
-        }
-
-        if ((categoryIds == null || categoryIds.isEmpty()) && level != null) {
-            return questionUseCase.findCardByLanguageIdAndLevel(level, languageId, size);
-        }
-
-        if (categoryIds != null && !categoryIds.isEmpty() && level == null) {
+        if (categoryIds != null && !categoryIds.isEmpty()) {
             return questionUseCase.findByCategoryIds(categoryIds, size);
         }
 
